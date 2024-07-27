@@ -38,6 +38,7 @@ COPY . .
 
 # 暴露应用程序端口
 EXPOSE 7860
+USER 1000
 
 # 启动应用程序
 CMD ["node", "index.js"]
