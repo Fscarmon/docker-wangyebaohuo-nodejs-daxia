@@ -4,10 +4,7 @@ FROM node:14
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files to the working directory
-COPY package*.json ./
-
-# Install any system dependencies
+# Install any system dependencies for Puppeteer and Chromium
 RUN apt-get update && apt-get install -y \
     build-essential \
     python3 \
@@ -42,8 +39,8 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js dependencies with increased network timeout
-RUN npm set network-timeout 600000 && npm install --verbose
+# Install Node.js dependencies
+RUN npm install @octokit/rest@^18.0.0 express@^4.17.1 node-cron@^2.0.3 puppeteer@^10.0.0 --verbose
 
 # Copy the rest of the application code to the working directory
 COPY . .
@@ -52,4 +49,4 @@ COPY . .
 EXPOSE 7860
 
 # Command to run the application
-CMD ["npm", "start"]
+CMD ["node", "index.js"]
