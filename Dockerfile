@@ -1,46 +1,55 @@
-# 使用官方的 Node.js Debian 镜像作为基础镜像
-FROM node:18-buster
+# Use an official Node.js image from the Docker Hub
+FROM node:14
 
-# 设置工作目录
+# Set the working directory inside the container
 WORKDIR /app
 
-# 复制 package.json 和 package-lock.json（如果有的话）
+# Copy the package.json and package-lock.json files to the working directory
 COPY package*.json ./
 
-# 安装 Node.js 依赖
-RUN npm install
-
-# 安装 Puppeteer 运行所需的库和 Chromium 浏览器
+# Install any system dependencies
 RUN apt-get update && apt-get install -y \
-    chromium \
-    libnss3 \
-    fonts-liberation \
-    libappindicator3-1 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
+    build-essential \
+    python3 \
+    libx11-dev \
     libx11-xcb1 \
     libxcomposite1 \
+    libxcursor1 \
     libxdamage1 \
-    libxrandr2 \
-    libxss1 \
+    libxext6 \
+    libxfixes3 \
+    libxi6 \
     libxtst6 \
-    lsb-release \
-    xdg-utils \
+    libnss3 \
+    libcups2 \
+    libdbus-1-3 \
+    libexpat1 \
+    libfontconfig1 \
+    libfreetype6 \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    libpango-1.0-0 \
+    libxrandr2 \
+    libasound2 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libpangocairo-1.0-0 \
+    libatspi2.0-0 \
+    libjpeg62-turbo \
+    libgdk-pixbuf2.0-0 \
     wget \
+    ca-certificates \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# 设置 Puppeteer 使用的 Chromium 路径
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# Install Node.js dependencies with increased network timeout
+RUN npm set network-timeout 600000 && npm install --verbose
 
-# 复制应用程序代码
+# Copy the rest of the application code to the working directory
 COPY . .
 
-# 暴露应用程序端口
+# Expose the port the app runs on
 EXPOSE 7860
 
-
-# 启动应用程序
-CMD ["node", "index.js"]
-
-
+# Command to run the application
+CMD ["npm", "start"]
