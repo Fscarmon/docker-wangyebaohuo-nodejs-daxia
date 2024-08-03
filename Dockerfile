@@ -1,52 +1,34 @@
-# Use an official Node.js image from the Docker Hub
-FROM node:14
+# 构建阶段
+FROM node:18-alpine AS builder
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Install any system dependencies for Puppeteer and Chromium
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    python3 \
-    libx11-dev \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxi6 \
-    libxtst6 \
-    libnss3 \
-    libcups2 \
-    libdbus-1-3 \
-    libexpat1 \
-    libfontconfig1 \
-    libfreetype6 \
-    libglib2.0-0 \
-    libgtk-3-0 \
-    libpango-1.0-0 \
-    libxrandr2 \
-    libasound2 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libpangocairo-1.0-0 \
-    libatspi2.0-0 \
-    libjpeg62-turbo \
-    libgdk-pixbuf2.0-0 \
-    wget \
-    ca-certificates \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# 复制 package.json 和 package-lock.json（如果存在）
+COPY package*.json ./
 
-# Install Node.js dependencies
-RUN npm install @octokit/rest@^18.0.0 express@^4.17.1 node-cron@^2.0.3 puppeteer@^10.0.0 --verbose
+# 安装依赖
+RUN npm ci --only=production
 
-# Copy the rest of the application code to the working directory
+# 复制源代码
 COPY . .
 
-# Expose the port the app runs on
+# 运行阶段
+FROM node:18-alpine
+
+# 安装 Chromium 和必要的依赖
+RUN apk add --no-cache chromium nss freetype harfbuzz ca-certificates ttf-freefont
+
+WORKDIR /app
+
+# 从构建阶段复制 node_modules 和其他文件
+COPY --from=builder /app ./
+
+# 设置 Puppeteer 使用系统安装的 Chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# 暴露端口
 EXPOSE 7860
 
-# Command to run the application
+# 启动命令
 CMD ["node", "index.js"]
