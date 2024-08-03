@@ -4,10 +4,9 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # 复制 package.json 和 package-lock.json（如果存在）
-COPY package*.json ./
+COPY package.json ./
 
-# 安装依赖
-RUN npm install --only=production
+RUN npm install
 
 # 复制源代码
 COPY . .
