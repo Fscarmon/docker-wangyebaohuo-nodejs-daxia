@@ -4,7 +4,7 @@ const cron = require('node-cron');
 const express = require('express');
 
 const app = express();
-const PORT = process.env.PORT || '7860';
+const PORT = 7860;
 
 // Define a route that returns "Hello World"
 app.get('/', (req, res) => {

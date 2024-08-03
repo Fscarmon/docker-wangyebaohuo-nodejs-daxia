@@ -1,33 +1,46 @@
-# 构建阶段
-FROM node:18-alpine AS builder
+# 使用官方的 Node.js Debian 镜像作为基础镜像
+FROM node:18-buster
 
+# 设置工作目录
 WORKDIR /app
 
-# 复制 package.json 和 package-lock.json（如果存在）
-COPY package.json ./
+# 复制 package.json 和 package-lock.json（如果有的话）
+COPY package*.json ./
 
+# 安装 Node.js 依赖
 RUN npm install
 
-# 复制源代码
+# 安装 Puppeteer 运行所需的库和 Chromium 浏览器
+RUN apt-get update && apt-get install -y \
+    chromium \
+    libnss3 \
+    fonts-liberation \
+    libappindicator3-1 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libxss1 \
+    libxtst6 \
+    lsb-release \
+    xdg-utils \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# 设置 Puppeteer 使用的 Chromium 路径
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
+# 复制应用程序代码
 COPY . .
 
-# 运行阶段
-FROM node:18-alpine
-
-# 安装 Chromium 和必要的依赖
-RUN apk add --no-cache chromium nss freetype harfbuzz ca-certificates ttf-freefont
-
-WORKDIR /app
-
-# 从构建阶段复制 node_modules 和其他文件
-COPY --from=builder /app ./
-
-# 设置 Puppeteer 使用系统安装的 Chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
-# 暴露端口
+# 暴露应用程序端口
 EXPOSE 7860
+USER 1000
 
-# 启动命令
+# 启动应用程序
 CMD ["node", "index.js"]
+
+
