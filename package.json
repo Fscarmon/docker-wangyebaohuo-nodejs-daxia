@@ -1,10 +1,20 @@
 {
-  "name": "your-app-name",
+  "name": "url-visitor",
   "version": "1.0.0",
+  "description": "A URL visitor application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "@octokit/rest": "^18.12.0",
     "puppeteer": "^10.4.0",
     "node-cron": "^3.0.0",
     "express": "^4.17.1"
-  }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "",
+  "license": "ISC"
 }
